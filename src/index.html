@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Guess Who</title>
+    <link rel="icon" type="image/png" href="/icon.png" />
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      "
+    >
+      <form action="/new_game" method="post" enctype="multipart/form-data">
+        <input type="file" id="character_pack" name="character_pack" />
+        <input type="submit" value="New Game" />
+      </form>
+    </div>
+  </body>
+</html>

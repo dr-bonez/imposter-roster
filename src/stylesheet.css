@@ -1,0 +1,60 @@
+table {
+    margin: auto;
+  }
+  td {
+    height: 150px;
+    width: 100px;
+    border: solid black 1px;
+    text-align: center;
+  }
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+  td:hover {
+    background-color: lightgray;
+  }
+  td.blackout {
+    background-color: black;
+  }
+  td.blackout:hover {
+    background-color: darkgrey;
+  }
+  td.blackout img {
+    opacity: 0.4;
+  }
+  #game-board.guessing td:hover {
+    border: solid yellowgreen 1px;
+    background-color: yellowgreen;
+  }
+  td:hover img {
+    opacity: 0.4;
+  }
+  td.correct {
+    border: solid green 1px !important;
+    background-color: green !important;
+  }
+  td.correct img {
+    opacity: 0.4;
+  }
+  td.incorrect {
+    border: solid red 1px !important;
+    background-color: red !important;
+  }
+  td.incorrect img {
+    opacity: 0.4;
+  }
+  button {
+    background-color: lightgray;
+  }
+  button.selected {
+    background-color: darkgray;
+  }
+  .mine {
+    margin: auto;
+    margin-top: 30px;
+    width: 200px;
+    height: 300px;
+    border: solid black 1px;
+  }

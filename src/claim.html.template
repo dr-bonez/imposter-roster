@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Guess Who</title>
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <script type="text/javascript">
+      /* prettier-ignore */
+      function claim() {{
+        document.cookie = "user_id={user_id}";
+        window.location.reload()
+      }}
+    </script>
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      "
+    >
+      <h2>Your friend has invited you to join their game of Guess Who</h2>
+    </div>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      "
+    >
+      <button onclick="claim()">Join Game!</button>
+    </div>
+  </body>
+</html>

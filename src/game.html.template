@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Guess Who</title>
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <style>
+      {stylesheet}
+    </style>
+    <script type="text/javascript">
+      /* prettier-ignore */
+      {javascript}
+    </script>
+  </head>
+  <body>
+    <div id="game-board">{game_board}</div>
+    <div class="mine">
+      <img src="./img-mine" />
+    </div>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      "
+    >
+      <button id="guess-button" onclick="guess_mode()">Guess!</button>
+    </div>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      "
+    >
+      <button onclick="new_game()">New Game</button>
+    </div>
+  </body>
+</html>
