@@ -68,7 +68,13 @@ impl CharacterCache {
                         .transpose()?,
                     data: data.into(),
                 });
-                self.0.insert(WeakHashable(Arc::downgrade(&character)));
+                let weak = WeakHashable(Arc::downgrade(&character));
+                let character = if let Some(c) = self.0.get(&weak).and_then(|c| c.0.upgrade()) {
+                    c
+                } else {
+                    self.0.insert(weak);
+                    character
+                };
                 set[idx].write(character);
                 initialized += 1;
             }

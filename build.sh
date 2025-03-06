@@ -21,6 +21,6 @@ fi
 alias 'rust-musl-builder'='docker run $USE_TTY --rm -e "RUSTFLAGS=$RUSTFLAGS" -v "$HOME/.cargo/registry":/root/.cargo/registry -v "$HOME/.cargo/git":/root/.cargo/git -v "$(pwd)":/home/rust/src -w /home/rust/src -P messense/rust-musl-cross:$ARCH-musl'
 
 rust-musl-builder cargo build --release --target=$ARCH-unknown-linux-musl
-if [ "$(ls -nd target/$ARCH-unknown-linux-musl/release/guess-who | awk '{ print $3 }')" != "$UID" ]; then
+if [ "$(ls -nd target/$ARCH-unknown-linux-musl/release/imposter-roster | awk '{ print $3 }')" != "$UID" ]; then
     rust-musl-builder sh -c "chown -R $UID:$UID target && chown -R $UID:$UID /root/.cargo"
 fi

@@ -1,4 +1,4 @@
-PACKAGE_ID := guess-who
+PACKAGE_ID := imposter-roster
 
 # Phony targets
 .PHONY: all clean install
@@ -7,13 +7,13 @@ PACKAGE_ID := guess-who
 all: ${PACKAGE_ID}.s9pk
 
 # Build targets
-${PACKAGE_ID}.s9pk: $(shell start-cli s9pk list-ingredients) target/x86_64-unknown-linux-musl/release/guess-who target/aarch64-unknown-linux-musl/release/guess-who 
+${PACKAGE_ID}.s9pk: $(shell start-cli s9pk list-ingredients) target/x86_64-unknown-linux-musl/release/imposter-roster target/aarch64-unknown-linux-musl/release/imposter-roster 
 	start-cli s9pk pack
 
-target/x86_64-unknown-linux-musl/release/guess-who: build.sh Cargo.toml Cargo.lock $(shell find src/)
+target/x86_64-unknown-linux-musl/release/imposter-roster: build.sh Cargo.toml Cargo.lock $(shell find src/)
 	ARCH=x86_64 ./build.sh
 
-target/aarch64-unknown-linux-musl/release/guess-who: build.sh Cargo.toml Cargo.lock $(shell find src/)
+target/aarch64-unknown-linux-musl/release/imposter-roster: build.sh Cargo.toml Cargo.lock $(shell find src/)
 	ARCH=aarch64 ./build.sh
 
 javascript/index.js: $(shell find startos -name *.ts -not -name *:*) tsconfig.json node_modules package.json

@@ -111,10 +111,10 @@ async fn main() {
                 }),
             )
             .route(
-                "/icon.png",
+                "/icon.jpeg",
                 get(|| async {
                     let mut res = StatusCode::OK.into_response();
-                    *res.body_mut() = Body::from(&include_bytes!("../icon.png")[..]);
+                    *res.body_mut() = Body::from(&include_bytes!("../icon.jpeg")[..]);
                     res.headers_mut()
                         .insert("content-type", HeaderValue::from_static("image/png"));
                     res

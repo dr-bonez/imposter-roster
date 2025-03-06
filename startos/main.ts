@@ -8,7 +8,7 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
    *
    * In this section, we fetch any resources or run any desired preliminary commands.
    */
-  console.info('Starting Guess Who!')
+  console.info('Starting Imposter Roster!')
 
   /**
    * ======================== Additional Health Checks (optional) ========================
@@ -25,8 +25,8 @@ export const main = sdk.setupMain(async ({ effects, started }) => {
    * Each daemon defines its own health check, which can optionally be exposed to the user.
    */
   return sdk.Daemons.of(effects, started, healthReceipts).addDaemon('primary', {
-    subcontainer: { imageId: 'guess-who' },
-    command: ['guess-who'],
+    subcontainer: { imageId: 'imposter-roster' },
+    command: ['imposter-roster'],
     mounts: sdk.Mounts.of(),
     ready: {
       display: 'Web Interface',

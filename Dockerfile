@@ -2,4 +2,4 @@ FROM scratch
 
 ARG ARCH
 
-ADD ./target/${ARCH}-unknown-linux-musl/release/guess-who /usr/bin/guess-who
+ADD ./target/${ARCH}-unknown-linux-musl/release/imposter-roster /usr/bin/imposter-roster

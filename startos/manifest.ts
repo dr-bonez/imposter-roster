@@ -1,22 +1,22 @@
 import { setupManifest } from '@start9labs/start-sdk'
 
 export const manifest = setupManifest({
-  id: 'guess-who',
-  title: 'Guess Who',
+  id: 'imposter-roster',
+  title: 'Imposter Roster',
   license: 'mit',
-  wrapperRepo: 'https://github.com/dr-bonez/guess-who',
-  upstreamRepo: 'https://github.com/dr-bonez/guess-who',
-  supportSite: 'https://github.com/dr-bonez/guess-who',
-  marketingSite: 'https://github.com/dr-bonez/guess-who',
+  wrapperRepo: 'https://github.com/dr-bonez/imposter-roster',
+  upstreamRepo: 'https://github.com/dr-bonez/imposter-roster',
+  supportSite: 'https://github.com/dr-bonez/imposter-roster',
+  marketingSite: 'https://github.com/dr-bonez/imposter-roster',
   donationUrl: null,
   description: {
-    short: 'A simple "Guess Who" game with custom character packs',
+    short: 'A simple character guessing game with custom character packs',
     long: 'TODO',
   },
   assets: [],
   volumes: ['main'],
   images: {
-    'guess-who': {
+    'imposter-roster': {
       source: {
         dockerBuild: {},
       },

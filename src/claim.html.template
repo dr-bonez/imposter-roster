@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Guess Who</title>
-    <link rel="icon" type="image/png" href="/icon.png" />
+    <title>Imposter Roster</title>
+    <link rel="icon" type="image/png" href="/icon.jpeg" />
     <script type="text/javascript">
       /* prettier-ignore */
       function claim() {{
@@ -20,7 +20,7 @@
         margin-top: 30px;
       "
     >
-      <h2>Your friend has invited you to join their game of Guess Who</h2>
+      <h2>Your friend has invited you to join their game of Imposter Roster</h2>
     </div>
     <div
       style="
