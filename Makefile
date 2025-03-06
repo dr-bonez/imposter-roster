@@ -16,7 +16,7 @@ target/x86_64-unknown-linux-musl/release/guess-who: build.sh Cargo.toml Cargo.lo
 target/aarch64-unknown-linux-musl/release/guess-who: build.sh Cargo.toml Cargo.lock $(shell find src/)
 	ARCH=aarch64 ./build.sh
 
-javascript/index.js: $(shell git ls-files startos) tsconfig.json node_modules package.json
+javascript/index.js: $(shell find startos -name *.ts -not -name *:*) tsconfig.json node_modules package.json
 	npm run build
 
 node_modules: package.json package-lock.json

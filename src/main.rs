@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::io::{Cursor, Read};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -14,9 +13,8 @@ use axum::Router;
 use rand::random;
 use serde::Serialize;
 use tokio::sync::broadcast;
-use zip::ZipArchive;
 
-use crate::pack::{CharacterPack, CharacterPackCache};
+use crate::pack::{CharacterCache, CharacterSet};
 use crate::utils::{SyncMutex, TimedResource};
 
 mod pack;
@@ -44,8 +42,7 @@ impl GameEvent {
 }
 
 struct GameState {
-    pack: ZipArchive<Cursor<CharacterPack>>,
-    characters: [usize; NUM_CHARS],
+    characters: CharacterSet,
     events: broadcast::Sender<GameEvent>,
     p0: PlayerState,
     p1: PlayerState,
@@ -93,7 +90,7 @@ struct GuessParams {
 #[derive(Default)]
 struct AppState {
     games: BTreeMap<u64, TimedResource<SyncMutex<GameState>>>,
-    cache: CharacterPackCache,
+    cache: CharacterCache,
 }
 
 #[tokio::main]
@@ -128,24 +125,33 @@ async fn main() {
                 post(|headers: HeaderMap, mut multipart: Multipart| async move {
                     async {
                         let game_id: u64 = random();
-                        let mut pack = None;
+                        let mut set = None;
                         if games.mutate(|g| g.cache.size()) >= MAX_CHARACTER_PACK_CACHE_SIZE {
                             let mut res = StatusCode::INSUFFICIENT_STORAGE.into_response();
                             *res.body_mut() = Body::from(include_str!("./overloaded.html"));
                             return Ok(res);
                         }
+                        let bad_req = |e: anyhow::Error| {
+                            let mut res = StatusCode::INSUFFICIENT_STORAGE.into_response();
+                            *res.body_mut() = Body::from(format!(
+                                include_str!("./invalid_pack.html.template"),
+                                error = e,
+                                error_dbg = serde_json::to_string(&format!("{e:?}")).unwrap()
+                            ));
+                            res
+                        };
                         while let Some(field) = multipart.next_field().await? {
                             if field.name() == Some("character_pack") {
                                 let bytes = field.bytes().await?;
-                                pack = Some(ZipArchive::new(Cursor::new(
-                                    games.mutate(|g| g.cache.cache(bytes)),
-                                )));
+                                set = Some(match games.mutate(|g| g.cache.load(bytes)) {
+                                    Ok(a) => a,
+                                    Err(e) => return Ok(bad_req(e.into())),
+                                });
                             }
                         }
-                        let pack = pack.ok_or_else(|| anyhow!("character pack required"))??;
-                        if pack.len() < NUM_CHARS {
-                            return Err(anyhow!("not enough characters in pack"));
-                        }
+                        let Some(set) = set else {
+                            return Ok(bad_req(anyhow!("character pack required")));
+                        };
                         let uid = headers
                             .get("cookie")
                             .and_then(|c| c.to_str().ok())
@@ -169,12 +175,7 @@ async fn main() {
                                 game_id,
                                 TimedResource::new(
                                     SyncMutex::new(GameState {
-                                        characters: rand::seq::index::sample_array::<_, NUM_CHARS>(
-                                            &mut rand::rng(),
-                                            pack.len(),
-                                        )
-                                        .unwrap(),
-                                        pack,
+                                        characters: set,
                                         events: broadcast::channel(10).0,
                                         p0,
                                         p1: PlayerState::random(),
@@ -364,21 +365,9 @@ async fn main() {
                                 row * NUM_COLS + col
                             };
 
-                            game.mutate(|g| {
-                                let file_idx = g.characters[char_idx];
-                                let mut file = g.pack.by_index(file_idx)?;
-                                let mut res = StatusCode::OK.into_response();
-                                let mut buf = Vec::new();
-                                file.read_to_end(&mut buf)?;
-                                if let Some(mime) = mime_guess::from_path(file.name()).first() {
-                                    res.headers_mut().insert(
-                                        "content-type",
-                                        HeaderValue::from_str(&mime.to_string())?,
-                                    );
-                                }
-                                *res.body_mut() = Body::from(buf);
-                                Ok(res)
-                            })
+                            Ok(game
+                                .peek(|g| g.characters.0[char_idx].clone())
+                                .to_response())
                         }
                         .await
                         .map_err(|e: anyhow::Error| {

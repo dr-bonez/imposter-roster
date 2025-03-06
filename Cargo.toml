@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1"
 axum = { version = "0.8", features = ["multipart", "ws"] }
+bytes = "1"
 mime_guess = "2"
 pin-project = "1"
 rand = "0.9"

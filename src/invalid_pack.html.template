@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Guess Who</title>
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <script type="text/javascript">console.error({error_dbg})</script>
+  </head>
+  <body>
+    <h1>400: BAD REQUEST</h1>
+    <h2>The character pack you uploaded is invalid!</h2>
+    <p>{error}</p>
+    <h3>Please make sure it is a zip file of at least 24 images</h3>
+  </body>
+</html>
