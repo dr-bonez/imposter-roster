@@ -157,9 +157,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.10.0"
+version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f61dac84819c6588b558454b194026eb1f09c293b9036ae9b159e74e73ab6cf9"
+checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
 
 [[package]]
 name = "bzip2"
@@ -539,6 +539,7 @@ dependencies = [
  "anyhow",
  "axum",
  "bytes",
+ "markdown",
  "mime_guess",
  "pin-project",
  "rand 0.9.0",
@@ -618,6 +619,15 @@ checksum = "297e814c836ae64db86b36cf2a557ba54368d03f6afcd7d947c266692f71115e"
 dependencies = [
  "byteorder",
  "crc",
+]
+
+[[package]]
+name = "markdown"
+version = "1.0.0-alpha.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9047e0a37a596d4e15411a1ffbdabe71c328908cb90a721cb9bf8dcf3434e6d2"
+dependencies = [
+ "unicode-id",
 ]
 
 [[package]]
@@ -835,7 +845,7 @@ checksum = "3779b94aeb87e8bd4e834cee3650289ee9e0d5677f976ecdb6d219e5f4f6cd94"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.3",
- "zerocopy 0.8.21",
+ "zerocopy 0.8.23",
 ]
 
 [[package]]
@@ -1071,9 +1081,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.38"
+version = "0.3.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb041120f25f8fbe8fd2dbe4671c7c2ed74d83be2e7a77529bf7e0790ae3f472"
+checksum = "dad298b01a40a23aac4580b67e3dbedb7cc8402f3592d7f49469de2ea4aecdd8"
 dependencies = [
  "deranged",
  "num-conv",
@@ -1090,9 +1100,9 @@ checksum = "765c97a5b985b7c11d7bc27fa927dc4fe6af3a6dfb021d28deb60d3bf51e76ef"
 
 [[package]]
 name = "tokio"
-version = "1.43.0"
+version = "1.44.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d61fa4ffa3de412bfea335c6ecff681de2b609ba3c77ef3e00e521813a9ed9e"
+checksum = "9975ea0f48b5aa3972bf2d888c238182458437cc2a19374b81b25cdf1023fb3a"
 dependencies = [
  "backtrace",
  "bytes",
@@ -1205,6 +1215,12 @@ name = "unicase"
 version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b844d17643ee918803943289730bec8aac480150456169e647ed0b576ba539"
+
+[[package]]
+name = "unicode-id"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10103c57044730945224467c09f71a4db0071c123a0648cc3e818913bde6b561"
 
 [[package]]
 name = "unicode-ident"
@@ -1333,11 +1349,11 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.21"
+version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcf01143b2dd5d134f11f545cf9f1431b13b749695cb33bcce051e7568f99478"
+checksum = "fd97444d05a4328b90e75e503a34bad781f14e28a823ad3557f0750df1ebcbc6"
 dependencies = [
- "zerocopy-derive 0.8.21",
+ "zerocopy-derive 0.8.23",
 ]
 
 [[package]]
@@ -1353,9 +1369,9 @@ dependencies = [
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.21"
+version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "712c8386f4f4299382c9abee219bee7084f78fb939d88b6840fcc1320d5f6da2"
+checksum = "6352c01d0edd5db859a63e2605f4ea3183ddbd15e2c4a9e7d32184df75e4f154"
 dependencies = [
  "proc-macro2",
  "quote",

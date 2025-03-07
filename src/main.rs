@@ -11,7 +11,8 @@ use axum::response::{IntoResponse, Redirect, Response};
 use axum::routing::{any, get, post};
 use axum::Router;
 use rand::random;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tokio::sync::broadcast;
 
 use crate::pack::{CharacterCache, CharacterSet};
@@ -25,20 +26,70 @@ const NUM_COLS: usize = 6;
 const NUM_CHARS: usize = NUM_ROWS * NUM_COLS;
 const MAX_CHARACTER_PACK_CACHE_SIZE: usize = 1024 * 1024 * 1024;
 
-#[derive(Clone, Copy, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[serde(rename_all = "kebab-case")]
 enum GameEvent {
-    Correct { user_id: u64, tries: usize },
-    Incorrect { user_id: u64 },
+    Connected {
+        user_id: u64,
+    },
+    Disconnected {
+        user_id: u64,
+    },
+    Correct {
+        user_id: u64,
+        tries: usize,
+    },
+    Incorrect {
+        user_id: u64,
+    },
+    Message {
+        #[serde(deserialize_with = "utils::deserialize_bigint")]
+        user_id: u64,
+        content: String,
+    },
+    Call {
+        #[serde(deserialize_with = "utils::deserialize_bigint")]
+        user_id: u64,
+        event: CallEvent,
+    },
 }
 impl GameEvent {
     fn user_id(&self) -> u64 {
         match self {
+            Self::Connected { user_id } => *user_id,
+            Self::Disconnected { user_id } => *user_id,
             Self::Correct { user_id, .. } => *user_id,
             Self::Incorrect { user_id } => *user_id,
+            Self::Message { user_id, .. } => *user_id,
+            Self::Call { user_id, .. } => *user_id,
         }
     }
+    fn handle_user_event(self, user_id: u64) -> Result<Self, anyhow::Error> {
+        if self.user_id() != user_id {
+            return Err(anyhow!("event does not match user_id cookie"));
+        }
+        match self {
+            Self::Message { content, .. } => Ok(Self::Message {
+                user_id,
+                content: markdown::to_html(&content)
+                    .trim_start_matches("<p>")
+                    .trim_end_matches("</p>")
+                    .to_owned(),
+            }),
+            Self::Call { .. } => Ok(self),
+            _ => Err(anyhow!("not a user defined event")),
+        }
+    }
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[serde(rename_all = "kebab-case")]
+enum CallEvent {
+    Offer { offer: Value },
+    Answer { answer: Value },
+    Candidate { candidate: Value },
+    Reject {},
 }
 
 struct GameState {
@@ -59,6 +110,33 @@ impl GameState {
             false
         }
     }
+    pub fn set_connected(&mut self, id: u64, connected: bool) -> Option<u64> {
+        let res = if self.p0.id == id {
+            self.p0.connected = connected;
+            if self.p1.connected {
+                Some(self.p1.id)
+            } else {
+                None
+            }
+        } else if self.p1.id == id {
+            self.p1.connected = connected;
+            if self.p0.connected {
+                Some(self.p0.id)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        self.events
+            .send(if connected {
+                GameEvent::Connected { user_id: id }
+            } else {
+                GameEvent::Disconnected { user_id: id }
+            })
+            .ok();
+        res
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -68,6 +146,7 @@ struct PlayerState {
     character: usize,
     incorrect_count: usize,
     correct: bool,
+    connected: bool,
 }
 impl PlayerState {
     fn random() -> Self {
@@ -77,6 +156,7 @@ impl PlayerState {
             character: rand::random_range(0..NUM_CHARS),
             incorrect_count: 0,
             correct: false,
+            connected: false,
         }
     }
 }
@@ -136,7 +216,8 @@ async fn main() {
                             *res.body_mut() = Body::from(format!(
                                 include_str!("./invalid_pack.html.template"),
                                 error = e,
-                                error_dbg = serde_json::to_string(&format!("{e:?}")).unwrap()
+                                error_dbg = serde_json::to_string(&format!("{e:?}")).unwrap(),
+                                num = NUM_CHARS,
                             ));
                             res
                         };
@@ -490,27 +571,62 @@ async fn main() {
                         };
                         let mut sub = game.peek(|g| g.events.subscribe());
                         ws.on_upgrade(move |mut ws| async move {
+                            let mut open = true;
                             if let Err(e) = async {
+                                if let Some(other) = game.mutate(|g| g.set_connected(uid, true)) {
+                                    ws.send(Message::Text(
+                                        serde_json::to_string(&GameEvent::Connected { user_id: other })?.into(),
+                                    ))
+                                    .await?;
+                                }
                                 loop {
-                                    match sub.recv().await {
-                                        Ok(e) if e.user_id() != uid => {
-                                            ws.send(Message::Text(
-                                                serde_json::to_string(&e)?.into(),
-                                            ))
-                                            .await?;
-                                        }
-                                        Err(broadcast::error::RecvError::Closed) => {
-                                            break;
-                                        }
-                                        _ => (),
+                                    tokio::select! {
+                                        event = sub.recv() => match event {
+                                            Ok(e) if e.user_id() != uid => {
+                                                ws.send(Message::Text(
+                                                    serde_json::to_string(&e)?.into(),
+                                                ))
+                                                .await?;
+                                            }
+                                            Err(broadcast::error::RecvError::Closed) => {
+                                                break;
+                                            }
+                                            _ => (),
+                                        },
+                                        msg = ws.recv() => {
+                                            if let Some(msg) = msg.transpose()? {
+                                                match msg {
+                                                    Message::Text(json) => {
+                                                        let event = serde_json::from_str::<GameEvent>(&json)?.handle_user_event(uid)?;
+                                                        let _ = game.mutate(|g| g.events.send(event));
+                                                    }
+                                                    Message::Close(a) => {
+                                                        ws.send(Message::Close(a)).await?;
+                                                        open = false;
+                                                        break;
+                                                    }
+                                                    Message::Ping(a) => {
+                                                        ws.send(Message::Pong(a)).await?;
+                                                    }
+                                                    _ => {
+                                                        eprintln!("unexpected ws message {msg:?}");
+                                                    },
+                                                }
+                                            } else {
+                                                open = false;
+                                                break;
+                                            }
+                                        },
                                     }
                                 }
-                                ws.send(Message::Close(Some(CloseFrame {
-                                    code: 1000,
-                                    reason: "complete".into(),
-                                })))
-                                .await?;
-                                ws.recv().await;
+                                if open {
+                                    ws.send(Message::Close(Some(CloseFrame {
+                                        code: 1000,
+                                        reason: "complete".into(),
+                                    })))
+                                    .await?;
+                                    ws.recv().await;
+                                }
                                 drop(ws);
 
                                 Ok::<_, anyhow::Error>(())
@@ -520,6 +636,7 @@ async fn main() {
                                 eprintln!("{e}");
                                 eprintln!("{e:?}");
                             }
+                            game.mutate(|g| g.set_connected(uid, false));
                         })
                     },
                 )

@@ -11,30 +11,44 @@
       {javascript}
     </script>
   </head>
-  <body>
-    <div id="game-board">{game_board}</div>
-    <div class="mine">
-      <img src="./img-mine" />
+  <body onload="load()">
+    <div id="sidebar">
+      <div id="event-log"></div>
+      <div id="chatbar">
+        <form onsubmit="event.preventDefault(); send_message()">
+          <input id="messagebar" type="text" name="message" />
+          <input type="submit" value="Send" />
+        </form>
+        <audio id="local-audio" autoplay muted></audio>
+        <audio id="remote-audio" autoplay></audio>
+        <button id="call-button" onclick="call()">Call</button>
+      </div>
     </div>
-    <div
-      style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 30px;
-      "
-    >
-      <button id="guess-button" onclick="guess_mode()">Guess!</button>
-    </div>
-    <div
-      style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 30px;
-      "
-    >
-      <button onclick="new_game()">New Game</button>
+    <div id="game">
+      <div id="game-board">{game_board}</div>
+      <div id="mine">
+        <img src="./img-mine" />
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 30px;
+        "
+      >
+        <button id="guess-button" onclick="guess_mode()">Guess!</button>
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 30px;
+        "
+      >
+        <button onclick="new_game()">New Game</button>
+      </div>
     </div>
   </body>
 </html>

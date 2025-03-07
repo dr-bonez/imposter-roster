@@ -7,8 +7,8 @@
   </head>
   <body>
     <h1>400: BAD REQUEST</h1>
-    <h2>The character pack you uploaded is invalid!</h2>
+    <h2>The character pack you uploaded is invalid:</h2>
     <p>{error}</p>
-    <h3>Please make sure it is a zip file of at least 24 images</h3>
+    <h3>Please make sure it is a zip file of at least {num} images</h3>
   </body>
 </html>

@@ -1,60 +1,111 @@
+body {
+  display: flex;
+  min-height: calc(100vh - 10px);
+}
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 20%;
+  min-width: 200px;
+  border: solid black 1px;
+  margin: 5px;
+}
+#event-log {
+  flex-grow: 1;
+  margin: 2px;
+  display: flex;
+  flex-direction: column;
+}
+#event-log > p {
+  border: gray solid 1px;
+  padding: 2px;
+  margin: 1px;
+}
+#event-log > p.mine {
+  border: green solid 1px;
+}
+#event-log > p.mine > b.title {
+  color: green;
+}
+#event-log > p.theirs {
+  border: blue solid 1px;
+}
+#event-log > p.theirs > b.title {
+  color: blue;
+}
+#chatbar {
+  margin: 2px;
+  display: flex;
+  flex-direction: row;
+}
+#chatbar form {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+#messagebar {
+  flex-grow: 1;
+}
+#game {
+  flex: 1 0 auto;
+}
 table {
-    margin: auto;
-  }
-  td {
-    height: 150px;
-    width: 100px;
-    border: solid black 1px;
-    text-align: center;
-  }
-  img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
-  td:hover {
-    background-color: lightgray;
-  }
-  td.blackout {
-    background-color: black;
-  }
-  td.blackout:hover {
-    background-color: darkgrey;
-  }
-  td.blackout img {
-    opacity: 0.4;
-  }
-  #game-board.guessing td:hover {
-    border: solid yellowgreen 1px;
-    background-color: yellowgreen;
-  }
-  td:hover img {
-    opacity: 0.4;
-  }
-  td.correct {
-    border: solid green 1px !important;
-    background-color: green !important;
-  }
-  td.correct img {
-    opacity: 0.4;
-  }
-  td.incorrect {
-    border: solid red 1px !important;
-    background-color: red !important;
-  }
-  td.incorrect img {
-    opacity: 0.4;
-  }
-  button {
-    background-color: lightgray;
-  }
-  button.selected {
-    background-color: darkgray;
-  }
-  .mine {
-    margin: auto;
-    margin-top: 30px;
-    width: 200px;
-    height: 300px;
-    border: solid black 1px;
-  }
+  margin: auto;
+}
+td {
+  height: 150px;
+  width: 100px;
+  border: solid black 1px;
+  text-align: center;
+}
+img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+td:hover {
+  background-color: lightgray;
+}
+td.blackout {
+  background-color: black;
+}
+td.blackout:hover {
+  background-color: darkgrey;
+}
+td.blackout img {
+  opacity: 0.4;
+}
+#game-board.guessing td:hover {
+  border: solid yellowgreen 1px;
+  background-color: yellowgreen;
+}
+td:hover img {
+  opacity: 0.4;
+}
+td.correct {
+  border: solid green 1px !important;
+  background-color: green !important;
+}
+td.correct img {
+  opacity: 0.4;
+}
+td.incorrect {
+  border: solid red 1px !important;
+  background-color: red !important;
+}
+td.incorrect img {
+  opacity: 0.4;
+}
+button {
+  background-color: lightgray;
+}
+button.selected {
+  background-color: darkgray;
+}
+#mine {
+  margin: auto;
+  margin-top: 30px;
+  width: 200px;
+  height: 300px;
+  border: solid black 1px;
+}

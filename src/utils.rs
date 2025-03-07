@@ -1,7 +1,10 @@
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 
+use serde::de::Visitor;
+use serde::Deserializer;
 use tokio::task::{JoinError, JoinHandle};
 
 #[derive(Debug, Default)]
@@ -86,4 +89,38 @@ impl<T: 'static + Send + Sync> TimedResource<T> {
     pub fn is_timed_out(&self) -> bool {
         self.handle.is_finished()
     }
+}
+
+pub fn deserialize_bigint<'de, D>(deserializer: D) -> Result<u64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    struct MyVisitor;
+
+    impl<'de> Visitor<'de> for MyVisitor {
+        type Value = u64;
+
+        fn expecting(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.write_str("integer or string")
+        }
+
+        fn visit_u64<E>(self, val: u64) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            Ok(val)
+        }
+
+        fn visit_str<E>(self, val: &str) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            match val.parse::<u64>() {
+                Ok(val) => self.visit_u64(val),
+                Err(_) => Err(E::custom("failed to parse integer")),
+            }
+        }
+    }
+
+    deserializer.deserialize_any(MyVisitor)
 }

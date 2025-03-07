@@ -9,6 +9,7 @@ use axum::body::{Body, Bytes};
 use axum::http::{HeaderValue, Response, StatusCode};
 use axum::response::IntoResponse;
 use bytes::BytesMut;
+use rand::rng;
 use zip::ZipArchive;
 
 use crate::NUM_CHARS;
@@ -52,20 +53,21 @@ impl CharacterCache {
         let mut set = [const { MaybeUninit::<Arc<Character>>::uninit() }; NUM_CHARS];
         let mut initialized = 0_usize;
         if let Err(e) = (|| {
-            for (idx, char_idx) in
-                rand::seq::index::sample_array::<_, NUM_CHARS>(&mut rand::rng(), zip.len())
-                    .ok_or_else(|| anyhow!("not enough images in the zip!"))?
-                    .into_iter()
-                    .enumerate()
-            {
+            for char_idx in rand::seq::index::sample(&mut rng(), zip.len(), zip.len()) {
                 let mut file = zip.by_index(char_idx)?;
+                let Some(mime) = mime_guess::from_path(file.name()).first() else {
+                    continue;
+                };
+                if mime.type_() != "image" {
+                    continue;
+                }
+                if mime.subtype() == "tiff" {
+                    continue;
+                }
                 let mut data = BytesMut::zeroed(file.size() as usize);
                 file.read_exact(&mut data)?;
                 let character = Arc::new(Character {
-                    content_type: mime_guess::from_path(file.name())
-                        .first()
-                        .map(|m| HeaderValue::from_str(&m.to_string()))
-                        .transpose()?,
+                    content_type: Some(HeaderValue::from_str(&mime.to_string())?),
                     data: data.into(),
                 });
                 let weak = WeakHashable(Arc::downgrade(&character));
@@ -75,8 +77,14 @@ impl CharacterCache {
                     self.0.insert(weak);
                     character
                 };
-                set[idx].write(character);
+                set[initialized].write(character);
                 initialized += 1;
+                if initialized == set.len() {
+                    break;
+                }
+            }
+            if initialized < set.len() {
+                return Err(anyhow!("not enough images in zip file!"));
             }
             Ok(())
         })() {
