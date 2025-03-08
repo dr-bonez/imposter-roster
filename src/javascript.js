@@ -66,105 +66,26 @@ let rejectOffer
 let connected = false
 
 /**
- * @type {RTCConfiguration}
+ *
+ * @returns {Promise<RTCConfiguration>}
  */
-const rtcConfig = {
-  iceServers: [
-    {
-      urls: [
-        'stun:stun.3wayint.com:3478',
-        'stun:stun.f.haeder.net:3478',
-        'stun:stun.siplogin.de:3478',
-        'stun:stun.lovense.com:3478',
-        'stun:stun.yesdates.com:3478',
-        'stun:stun.sonetel.com:3478',
-        'stun:stun.voipia.net:3478',
-        'stun:stun.romaaeterna.nl:3478',
-        'stun:stun.sipnet.com:3478',
-        'stun:stun.siptrunk.com:3478',
-        'stun:stun.antisip.com:3478',
-        'stun:stun.signalwire.com:3478',
-        'stun:stun.finsterwalder.com:3478',
-        'stun:stun.ipfire.org:3478',
-        'stun:stun.voipgate.com:3478',
-        'stun:stun.radiojar.com:3478',
-        'stun:stun.lleida.net:3478',
-        'stun:stun.kanojo.de:3478',
-        'stun:stun.peeters.com:3478',
-        'stun:stun.nanocosmos.de:3478',
-        'stun:stun.acronis.com:3478',
-        'stun:stun.bridesbay.com:3478',
-        'stun:stun.meetwife.com:3478',
-        'stun:stun.ttmath.org:3478',
-        'stun:stun.ringostat.com:3478',
-        'stun:stun.files.fm:3478',
-        'stun:stun.atagverwarming.nl:3478',
-        'stun:stun.poetamatusel.org:3478',
-        'stun:stun.cope.es:3478',
-        'stun:stun.ncic.com:3478',
-        'stun:stun.sipnet.net:3478',
-        'stun:stun.verbo.be:3478',
-        'stun:stun.mixvoip.com:3478',
-        'stun:stun.ukh.de:3478',
-        'stun:stun.moonlight-stream.org:3478',
-        'stun:stun.stochastix.de:3478',
-        'stun:stun.3deluxe.de:3478',
-        'stun:stun.peethultra.be:3478',
-        'stun:stun.nextcloud.com:443',
-        'stun:stun.thinkrosystem.com:3478',
-        'stun:stun.avigora.fr:3478',
-        'stun:stun.diallog.com:3478',
-        'stun:stun.axialys.net:3478',
-        'stun:stun.oncloud7.ch:3478',
-        'stun:stun.ru-brides.com:3478',
-        'stun:stun.sip.us:3478',
-        'stun:stun.heeds.eu:3478',
-        'stun:stun.sonetel.net:3478',
-        'stun:stun.romancecompass.com:3478',
-        'stun:stun.allflac.com:3478',
-        'stun:stun.genymotion.com:3478',
-        'stun:stun.hot-chilli.net:3478',
-        'stun:stun.business-isp.nl:3478',
-        'stun:stun.flashdance.cx:3478',
-        'stun:stun.bethesda.net:3478',
-        'stun:stun.bitburger.de:3478',
-        'stun:stun.frozenmountain.com:3478',
-        'stun:stun.graftlab.com:3478',
-        'stun:stun.jowisoftware.de:3478',
-        'stun:stun.threema.ch:3478',
-        'stun:stun.kaseya.com:3478',
-        'stun:stun.fitauto.ru:3478',
-        'stun:stun.vavadating.com:3478',
-        'stun:stun.annatel.net:3478',
-        'stun:stun.pure-ip.com:3478',
-        'stun:stun.myspeciality.com:3478',
-        'stun:stun.zepter.ru:3478',
-        'stun:stun.zentauron.de:3478',
-        'stun:stun.streamnow.ch:3478',
-        'stun:stun.voip.blackberry.com:3478',
-        'stun:stun.geesthacht.de:3478',
-        'stun:stun.healthtap.com:3478',
-        'stun:stun.dcalling.de:3478',
-        'stun:stun.m-online.net:3478',
-        'stun:stun.piratenbrandenburg.de:3478',
-        'stun:stun.sipnet.ru:3478',
-        'stun:stun.uabrides.com:3478',
-        'stun:stun.nextcloud.com:3478',
-        'stun:stun.baltmannsweiler.de:3478',
-        'stun:stun.freeswitch.org:3478',
-        'stun:stun.engineeredarts.co.uk:3478',
-        'stun:stun.linuxtrent.it:3478',
-        'stun:stun.imp.ch:3478',
-        'stun:stun.telnyx.com:3478',
-        'stun:stun.godatenow.com:3478',
-        'stun:stun.skydrone.aero:3478',
-        'stun:stun.alpirsbacher.de:3478',
-        'stun:stun.1cbit.ru:3478',
-        'stun:stun.root-1.de:3478',
-        'stun:stun.technosens.fr:3478',
-      ],
-    },
-  ],
+async function rtcConfig() {
+  const stunsRes = await fetch(
+    'https://raw.githubusercontent.com/pradt2/always-online-stun/master/valid_hosts.txt',
+  )
+  const stuns = new TextDecoder()
+    .decode(await stunsRes.arrayBuffer())
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => !!s)
+    .map((s) => `stun:${s}`)
+  return {
+    iceServers: [
+      {
+        urls: stuns,
+      },
+    ],
+  }
 }
 
 /**
@@ -183,27 +104,24 @@ function load() {
     const event = JSON.parse(ev.data)
     switch (event.type) {
       case 'connected': {
-        eventLog.innerHTML += `<p><b>The other player has connected.</b></p>`
+        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player has connected.</b></p>`
         connected = true
         callButton.removeAttribute('disabled')
         break
       }
       case 'disconnected': {
-        eventLog.innerHTML += `<p><b>The other player has disconnected.</b></p>`
-        endCall().catch((e) => {
-          console.error(e)
-          callState = 'oncall'
-        })
+        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player has disconnected.</b></p>`
+        endCall().catch((e) => console.error(e))
         connected = false
         callButton.setAttribute('disabled', true)
         break
       }
       case 'correct': {
-        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player correctly guessed your character in ${event.tries} tries!</b></p>`
+        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player <span style="color: green">correctly</span> guessed your character in ${event.tries} ${event.tries === 1 ? 'try' : 'tries'}!</b></p>`
         break
       }
       case 'incorrect': {
-        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player incorrectly guessed your character.</b></p>`
+        eventLog.innerHTML += `<p class="theirs"><b class="title">The other player <span style="color: red">incorrectly</span> guessed your character.</b></p>`
         break
       }
       case 'message': {
@@ -216,7 +134,7 @@ function load() {
             if (confirm('You are receiving a call! Accept?')) {
               startCall(event.event.offer).catch((e) => {
                 console.error(e)
-                callState = null
+                return endCall().catch(console.error)
               })
             } else {
               ws.send(
@@ -237,8 +155,7 @@ function load() {
                 )
                 .catch((e) => {
                   console.error(e)
-                  if (rejectOffer) rejectOffer()
-                  else callState = null
+                  return endCall().catch(console.error)
                 }),
             )
             break
@@ -249,15 +166,14 @@ function load() {
                 .addIceCandidate(new RTCIceCandidate(event.event.candidate))
                 .catch((e) => {
                   console.error(e)
-                  if (rejectOffer) rejectOffer()
-                  else callState = null
+                  return endCall().catch(console.error)
                 }),
             )
             break
           }
           case 'reject': {
-            if (rejectOffer) rejectOffer()
-            else callState = null
+            endCall(false).catch(console.error)
+            break
           }
         }
         break
@@ -280,12 +196,12 @@ function handle_click(id) {
             document.getElementById(id).classList.remove('blackout')
             document.getElementById(id).classList.add('correct')
             eventLog.innerHTML +=
-              '<p class="mine"><b class="title">You guessed correctly!</b></p>'
+              '<p class="mine"><b class="title">You guessed <span style="color: green">correctly</span>!</b></p>'
           } else {
             document.getElementById(id).classList.remove('blackout')
             document.getElementById(id).classList.add('incorrect')
             eventLog.innerHTML +=
-              '<p class="mine"><b class="title">You guessed incorrectly.</b></p>'
+              '<p class="mine"><b class="title">You guessed <span style="color: red">incorrectly</span>.</b></p>'
           }
         } else {
           console.error('unexpected response', json)
@@ -300,23 +216,6 @@ function handle_click(id) {
 }
 
 let callState = null
-function call() {
-  if (connected) {
-    if (callState === null) {
-      startCall().catch((e) => {
-        console.error(e)
-        callState = null
-      })
-    } else if (callState === 'calling') {
-      console.error('call already running')
-    } else if (callState === 'oncall') {
-      endCall().catch((e) => {
-        console.error(e)
-        callState = 'oncall'
-      })
-    }
-  }
-}
 
 /**
  *
@@ -333,14 +232,19 @@ async function startCall(offer) {
     localAudio.srcObject = stream
   }
 
-  setPeerConnection(new RTCPeerConnection(rtcConfig))
+  setPeerConnection(new RTCPeerConnection(await rtcConfig()))
 
   for (const track of localAudioStream.getTracks()) {
-    console.error(track)
     peerConnection.addTrack(track, localAudioStream)
   }
+  peerConnection.ontrack = (event) => {
+    console.error(event)
+    if (event.streams && event.streams[0]) {
+      remoteAudio.srcObject = event.streams[0]
+    }
+  }
   if (offer) {
-    peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
     const answer = await peerConnection.createAnswer()
     await peerConnection.setLocalDescription(answer)
     ws.send(
@@ -372,14 +276,19 @@ async function startCall(offer) {
       )
     }
   }
+
   await new Promise((resolve, reject) => {
     rejectOffer = (e) => {
       reject(e)
       rejectOffer = undefined
     }
-    peerConnection.ontrack = (event) => {
-      if (event.streams && event.streams[0]) {
-        remoteAudio.srcObject = event.streams[0]
+    peerConnection.onconnectionstatechange = (_) => {
+      if (
+        peerConnection.connectionState === 'failed' ||
+        peerConnection.connectionState === 'closed'
+      ) {
+        reject('connection failed')
+      } else if (peerConnection.connectionState === 'connected') {
         resolve()
       }
     }
@@ -390,11 +299,23 @@ async function startCall(offer) {
   callButton.removeAttribute('disabled')
 }
 
-async function endCall() {
+async function endCall(reject = true) {
+  if (rejectOffer) rejectOffer()
   if (peerConnection) peerConnection.close()
   unsetPeerConnection()
+  if (reject)
+    ws.send(
+      JSON.stringify({
+        type: 'call',
+        user_id,
+        event: {
+          type: 'reject',
+        },
+      }),
+    )
   callState = null
   callButton.innerHTML = 'Call'
+  if (connected) callButton.removeAttribute('disabled')
 }
 
 const user_id = document.cookie
@@ -416,4 +337,22 @@ function send_message() {
   )
   eventLog.innerHTML += `<p class="mine"><b class="title">You: </b>${message}</p>`
   messagebar.value = ''
+}
+
+function call() {
+  if (connected) {
+    if (callState === null) {
+      startCall().catch((e) => {
+        console.error(e)
+        endCall().catch(console.error(e))
+      })
+    } else if (callState === 'calling') {
+      console.error('call already running')
+    } else if (callState === 'oncall') {
+      endCall().catch((e) => {
+        console.error(e)
+        callState = 'oncall'
+      })
+    }
+  }
 }

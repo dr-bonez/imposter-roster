@@ -6,7 +6,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 20%;
-  min-width: 200px;
+  min-width: 300px;
   border: solid black 1px;
   margin: 5px;
 }
@@ -22,16 +22,16 @@ body {
   margin: 1px;
 }
 #event-log > p.mine {
-  border: green solid 1px;
+  border: darkblue solid 1px;
 }
 #event-log > p.mine > b.title {
-  color: green;
+  color: darkblue;
 }
 #event-log > p.theirs {
-  border: blue solid 1px;
+  border: darkmagenta solid 1px;
 }
 #event-log > p.theirs > b.title {
-  color: blue;
+  color: darkmagenta;
 }
 #chatbar {
   margin: 2px;
